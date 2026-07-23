@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Local Demonlist</title>
+  <link href="https://fonts.cdnfonts.com/css/glacial-indifference-2" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: #121620;
+      --panel-2: #191f2b;
+      --line: #252d3b;
+      --text: #eef2f8;
+      --muted: #98a3b3;
+      --accent: #5da9ff;
+      --accent-2: #8b5cf6;
+      --danger: #ff5d73;
+      --success: #42d392;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Glacial Indifference', system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 85% 0%, rgba(93,169,255,.12), transparent 28%),
+        radial-gradient(circle at 15% 100%, rgba(139,92,246,.1), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .site-header {
+      height: 210px;
+      display: grid;
+      place-items: center;
+      padding: 18px 28px;
+      background: #050608;
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 18px 45px rgba(0,0,0,.32);
+      position: relative;
+      z-index: 2;
+    }
+    .site-header img {
+      display: block;
+      width: min(760px, 88vw);
+      max-height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 28px rgba(0,0,0,.55));
+    }
+    .app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 210px); }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(10,13,18,.92);
+      backdrop-filter: blur(18px);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .brand { display: grid; gap: 5px; margin-bottom: 22px; padding: 4px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-copy { text-align: left; }
+    .brand h1 { font-size: 15px; margin: 0; letter-spacing: .02em; }
+    .brand span { display:block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .nav { display: grid; gap: 8px; }
+    .nav button {
+      width: 100%; border: 0; color: var(--muted); background: transparent;
+      padding: 12px 14px; border-radius: 10px; text-align: left; font-weight: 600;
+      cursor: pointer; transition: .18s ease; font-size: 14px;
+    }
+    .nav button:hover, .nav button.active { background: var(--panel-2); color: var(--text); }
+    .nav button.active { box-shadow: inset 3px 0 0 var(--accent); }
+    .side-note {
+      position: absolute; left: 18px; right: 18px; bottom: 18px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      padding: 14px; color: var(--muted); font-size: 12px; line-height: 1.5;
+    }
+    main { padding: 34px; max-width: 1500px; width: 100%; margin: 0 auto; }
+    .topbar { display:flex; justify-content: space-between; gap: 20px; align-items: end; margin-bottom: 24px; }
+    .topbar h2 { margin: 0 0 6px; font-size: 30px; letter-spacing: -.03em; }
+    .topbar p { margin: 0; color: var(--muted); }
+    .pill {
+      background: rgba(93,169,255,.1); color: #a8d2ff; border: 1px solid rgba(93,169,255,.25);
+      border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 700;
+    }
+    .stats { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat { background: rgba(18,22,32,.9); border: 1px solid var(--line); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+    .stat .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing:.1em; }
+    .stat .value { font-size: 25px; font-weight: 800; margin-top: 7px; }
+    .toolbar { display:flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search, select {
+      background: var(--panel); border: 1px solid var(--line); color: var(--text);
+      border-radius: 10px; padding: 12px 14px; outline: none;
+    }
+    .search { flex: 1; min-width: 220px; }
+    select { min-width: 150px; }
+    .content-grid { display:grid; grid-template-columns: minmax(0,1.6fr) minmax(320px,.8fr); gap: 18px; }
+    .card { background: rgba(18,22,32,.94); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+    .card-head { padding: 16px 18px; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+    .card-head h3 { margin:0; font-size:15px; }
+    .card-head span { color:var(--muted); font-size:12px; }
+    .list { display:grid; }
+    .level-row {
+      display:grid; grid-template-columns: 54px 86px 1fr auto; gap:14px; align-items:center;
+      padding: 14px 18px; border-bottom:1px solid var(--line); cursor:pointer; transition:.18s ease;
+    }
+    .level-row:last-child { border-bottom: 0; }
+    .level-row:hover, .level-row.selected { background: var(--panel-2); }
+    .rank { font-weight:900; font-size:17px; color:#c8d4e6; }
+    .thumb {
+      height:54px; border-radius:10px; display:grid; place-items:center; font-weight:900; font-size:12px;
+      background: linear-gradient(135deg, rgba(255,93,115,.95), rgba(139,92,246,.85));
+      border: 1px solid rgba(255,255,255,.08);
+      overflow: hidden;
+      position: relative;
+    }
+    .thumb.image-thumb {
+      background: #0f1117;
+      padding: 0;
+    }
+    .thumb.image-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .level-info h4 { margin:0 0 5px; font-size:15px; }
+    .level-info p { margin:0; color:var(--muted); font-size:12px; }
+    .points { text-align:right; font-weight:800; }
+    .points small { display:block; color:var(--muted); font-size:10px; font-weight:500; margin-top:4px; }
+    .detail { padding: 18px; }
+    .detail-banner {
+      height: 180px; border-radius: 14px; padding: 18px; display:flex; flex-direction:column; justify-content:end;
+      background:
+        linear-gradient(to top, rgba(8,10,15,.92), rgba(8,10,15,.18)),
+        linear-gradient(135deg, #fe4a62, #5f4dff 60%, #28c7d8);
+      background-size: cover;
+      background-position: center;
+      margin-bottom:16px;
+      overflow: hidden;
+    }
+    .detail-banner h3 { margin:0; font-size:26px; }
+    .detail-banner p { margin:6px 0 0; color:#d6dcef; font-size:13px; }
+    .meta { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .meta div { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .meta span { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
+    .meta strong { display:block; margin-top:5px; font-size:13px; }
+    .victors { display:flex; flex-wrap:wrap; gap:8px; position:relative; }
+    .victor-wrap { position: relative; }
+    .victor {
+      appearance:none; cursor:pointer;
+      background: rgba(66,211,146,.1); border:1px solid rgba(66,211,146,.25); color:#8ce8ba;
+      padding:7px 10px; border-radius:999px; font-size:11px; font-weight:700;
+      transition:.16s ease;
+    }
+    .victor:hover, .victor[aria-expanded="true"] {
+      background: rgba(66,211,146,.2); border-color:rgba(66,211,146,.55); transform:translateY(-1px);
+    }
+    .content-grid > .card:last-child { overflow: visible; }
+    .social-popup {
+      position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); z-index:50; width:190px;
+      background:#101620; border:1px solid var(--line); border-radius:12px; padding:12px;
+      box-shadow:0 18px 45px rgba(0,0,0,.48);
+    }
+    .social-popup::before {
+      content:""; position:absolute; left:-6px; top:50%; width:10px; height:10px;
+      background:#101620; border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+      transform:translateY(-50%) rotate(45deg);
+    }
+    .social-popup h4 { margin:0 0 9px; font-size:13px; }
+    .social-links { display:grid; gap:7px; }
+    .social-link {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:8px 9px; border-radius:8px; background:var(--panel-2); border:1px solid var(--line);
+      color:var(--text); font-size:11px; font-weight:700;
+    }
+    .social-link:hover { border-color:rgba(93,169,255,.55); }
+    .social-empty { color:var(--muted); font-size:11px; line-height:1.4; }
+
+    .video-actions { margin-top: 18px; display: grid; gap: 8px; }
+    .video-button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      width: 100%; border: 1px solid rgba(255,93,115,.38); border-radius: 11px;
+      padding: 12px 14px; background: linear-gradient(135deg, rgba(255,93,115,.18), rgba(139,92,246,.16));
+      color: var(--text); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .video-button:hover { transform: translateY(-1px); border-color: rgba(255,93,115,.72); background: linear-gradient(135deg, rgba(255,93,115,.28), rgba(139,92,246,.24)); }
+    .video-button svg { width: 17px; height: 17px; fill: currentColor; }
+    .video-note { color: var(--muted); font-size: 11px; line-height: 1.45; text-align: center; }
+    .leaderboard { display:grid; }
+    .player { display:grid; grid-template-columns:36px 1fr auto; gap:10px; padding:14px 18px; border-bottom:1px solid var(--line); align-items:center; }
+    .player:last-child { border-bottom:0; }
+    .avatar { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--panel-2); border:1px solid var(--line); font-weight:800; font-size:12px; }
+    .player strong { font-size:13px; }
+    .player span { display:block; color:var(--muted); font-size:11px; margin-top:3px; }
+    .score { font-weight:800; }
+
+    .records-feed { display:grid; gap:24px; }
+    .record-card {
+      overflow:hidden; background:rgba(18,22,32,.94); border:1px solid var(--line);
+      border-radius:18px; box-shadow:var(--shadow);
+    }
+    .record-video {
+      position:relative; width:100%; aspect-ratio:16 / 9; background:#050608;
+      border-bottom:1px solid var(--line);
+    }
+    .record-video iframe {
+      position:absolute; inset:0; width:100%; height:100%; border:0;
+    }
+    .record-fallback {
+      position:absolute; inset:0; display:grid; place-items:center; overflow:hidden;
+      background:#050608;
+    }
+    .record-fallback img { width:100%; height:100%; object-fit:cover; display:block; opacity:.82; }
+    .record-fallback::after {
+      content:'▶'; position:absolute; width:82px; height:58px; border-radius:16px;
+      display:grid; place-items:center; font-size:30px; color:white;
+      background:rgba(255,0,0,.9); box-shadow:0 12px 35px rgba(0,0,0,.45);
+    }
+    .local-preview-note {
+      margin-bottom:18px; padding:14px 16px; border-radius:12px;
+      background:rgba(255,193,7,.1); border:1px solid rgba(255,193,7,.3);
+      color:#f7d77a; font-size:13px; line-height:1.55;
+    }
+    .record-copy { padding:22px 24px 24px; }
+    .record-copy h3 { margin:0 0 8px; font-size:27px; letter-spacing:-.025em; }
+    .record-copy p { margin:0; color:var(--muted); font-size:14px; line-height:1.65; }
+    .record-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    .record-tag {
+      padding:7px 10px; border-radius:999px; font-size:11px; font-weight:800;
+      background:rgba(93,169,255,.1); border:1px solid rgba(93,169,255,.24); color:#a8d2ff;
+    }
+    .record-link {
+      display:inline-flex; align-items:center; gap:8px; margin-top:16px; color:#fff;
+      font-size:12px; font-weight:800; padding:10px 13px; border-radius:10px;
+      background:rgba(255,93,115,.14); border:1px solid rgba(255,93,115,.35);
+    }
+    .record-link:hover { background:rgba(255,93,115,.23); }
+
+    .rules-grid { display:grid; gap:12px; }
+    .rule-card {
+      display:grid; grid-template-columns:42px 1fr; gap:14px; align-items:start;
+      padding:16px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px;
+    }
+    .rule-number {
+      width:38px; height:38px; border-radius:10px; display:grid; place-items:center;
+      background:rgba(93,169,255,.12); border:1px solid rgba(93,169,255,.28);
+      color:#a8d2ff; font-weight:900; font-size:13px;
+    }
+    .rule-card h3 { margin:1px 0 6px; font-size:14px; }
+    .rule-card p { margin:0; color:var(--muted); font-size:12px; line-height:1.6; }
+    .rules-note {
+      margin-top:14px; padding:14px 16px; border-radius:12px;
+      background:rgba(255,193,7,.08); border:1px solid rgba(255,193,7,.22);
+      color:#e8d79a; font-size:12px; line-height:1.55;
+    }
+
+    .submit-invite {
+      display:flex; align-items:center; gap:22px; padding:28px;
+      background:linear-gradient(135deg, rgba(88,101,242,.24), rgba(88,101,242,.08));
+      border:1px solid rgba(114,127,255,.48); border-radius:18px;
+      box-shadow:var(--shadow); transition:.18s ease; min-height:150px;
+    }
+    .submit-invite:hover {
+      transform:translateY(-2px); border-color:rgba(145,155,255,.82);
+      background:linear-gradient(135deg, rgba(88,101,242,.34), rgba(88,101,242,.13));
+    }
+    .discord-logo {
+      flex:0 0 auto; width:86px; height:86px; border-radius:24px;
+      display:grid; place-items:center; background:#5865f2;
+      box-shadow:0 16px 36px rgba(88,101,242,.28);
+    }
+    .discord-logo img { width:56px; height:56px; object-fit:contain; display:block; }
+    .submit-invite-copy { min-width:0; }
+    .submit-invite-copy h3 { margin:0 0 9px; font-size:24px; line-height:1.2; }
+    .submit-invite-copy p { margin:0; color:var(--muted); line-height:1.55; }
+    .submit-arrow { margin-left:auto; font-size:30px; color:#b8c0ff; font-weight:800; }
+    @media (max-width:620px) {
+      .submit-invite { padding:20px; gap:15px; align-items:flex-start; }
+      .discord-logo { width:64px; height:64px; border-radius:18px; }
+      .discord-logo img { width:42px; height:42px; }
+      .submit-invite-copy h3 { font-size:19px; }
+      .submit-arrow { display:none; }
+    }
+    .hidden { display:none !important; }
+    @media (max-width: 980px) {
+      .site-header { height: 165px; padding: 14px 20px; }
+      .site-header img { max-height: 140px; }
+      .app { grid-template-columns: 1fr; min-height: calc(100vh - 165px); }
+      .sidebar { position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
+      .nav { grid-template-columns: repeat(6, 1fr); }
+      .nav button { text-align:center; padding:10px 6px; font-size:12px; }
+      .side-note { display:none; }
+      .content-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 620px) {
+      .site-header { height: 130px; padding: 10px 12px; }
+      .site-header img { width: 96vw; max-height: 112px; }
+      main { padding:20px 14px; }
+      .topbar { align-items:flex-start; flex-direction:column; }
+      .stats { grid-template-columns:1fr 1fr; }
+      .level-row { grid-template-columns:42px 66px 1fr; }
+      .points { display:none; }
+      .thumb { height:46px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <img src="local-demonlist-logo.png" alt="Local Demonlist logo">
+  </header>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-copy"><h1>Local Demonlist</h1><span>Community rankings</span></div>
+      </div>
+      <nav class="nav">
+        <button class="active" data-page="list">Demonlist</button>
+        <button data-page="players">Players</button>
+        <button data-page="records">Records</button>
+        <button data-page="news">News</button>
+        <button data-page="submit">Submit</button>
+        <button data-page="rules">Rules</button>
+      </nav>
+      <div class="side-note">Local Geometry Dash demon rankings for Aven and friends.</div>
+    </aside>
+
+    <main>
+      <section id="listPage">
+        <div class="topbar">
+          <div><h2>Local Demonlist</h2><p>Ranked by your group’s own difficulty opinions.</p></div>
+          
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="label">Levels</div><div class="value">19</div></div>
+          <div class="stat"><div class="label">Players</div><div class="value">4</div></div>
+          <div class="stat"><div class="label">Records</div><div class="value">30</div></div>
+          <div class="stat"><div class="label">Hardest</div><div class="value">Nine Circles</div></div>
+        </div>
+
+        <div class="toolbar">
+          <input class="search" id="search" placeholder="Search levels, creators, or victors..." />
+          <select id="tierFilter"><option value="all">All tiers</option><option>Main List</option><option>Extended List</option><option>Legacy List</option></select>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-head"><h3>Rankings</h3><span id="resultCount">19 levels</span></div>
+            <div class="list" id="levelList"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Level details</h3><span>Click a level</span></div>
+            <div class="detail" id="detailPanel"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="playersPage" class="hidden">
+        <div class="topbar"><div><h2>Player Leaderboard</h2><p>Points are earned by completing ranked levels.</p></div></div>
+        <div class="card"><div class="card-head"><h3>Top players</h3></div><div class="leaderboard" id="leaderboard"></div></div>
+      </section>
+
+      <section id="recordsPage" class="hidden">
+        <div class="topbar">
+          <div><h2>Completion Records</h2><p>Watch accepted completions without leaving the Local Demonlist.</p></div>
+          <div class="pill">4 videos</div>
+        </div>
+        <div id="localPreviewNote"></div>
+        <div class="records-feed">
+          <article class="record-card">
+            <div class="record-video">
+              <div class="youtube-embed" data-id="jZEiwDt22Pk" data-title="Nine Circles completion by Aven" data-url="https://www.youtube.com/watch?v=jZEiwDt22Pk"></div>
+            </div>
+            <div class="record-copy">
+              <h3>Nine Circles — Completed by Aven</h3>
+              <p>Aven completes Nine Circles, the current hardest level on the Local Demonlist.</p>
+              <div class="record-meta"><span class="record-tag">#1 on the list</span><span class="record-tag">Hard Demon</span><span class="record-tag">Aven</span></div>
+              <a class="record-link" href="https://www.youtube.com/watch?v=jZEiwDt22Pk" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+            </div>
+          </article>
+
+          <article class="record-card">
+            <div class="record-video">
+              <div class="youtube-embed" data-id="kKN0W1r2gu0" data-title="iSpyWithMyLittleEye completion by Aven" data-url="https://www.youtube.com/watch?v=kKN0W1r2gu0"></div>
+            </div>
+            <div class="record-copy">
+              <h3>iSpyWithMyLittleEye — Completed by Aven</h3>
+              <p>Aven's full completion of Voxicat's effect-heavy Easy Demon, iSpyWithMyLittleEye.</p>
+              <div class="record-meta"><span class="record-tag">#11 on the list</span><span class="record-tag">Easy Demon</span><span class="record-tag">Aven</span></div>
+              <a class="record-link" href="https://www.youtube.com/watch?v=kKN0W1r2gu0" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+            </div>
+          </article>
+
+          <article class="record-card">
+            <div class="record-video">
+              <div class="youtube-embed" data-id="xAMgzi0b-Ic" data-start="82" data-title="Deadlocked completion by Aven" data-url="https://www.youtube.com/watch?v=xAMgzi0b-Ic&t=82s"></div>
+            </div>
+            <div class="record-copy">
+              <h3>Deadlocked — Completed by Aven</h3>
+              <p>Aven beats RobTop's Deadlocked. The embedded video begins near the start of the completion run.</p>
+              <div class="record-meta"><span class="record-tag">#5 on the list</span><span class="record-tag">Demon</span><span class="record-tag">Aven</span></div>
+              <a class="record-link" href="https://www.youtube.com/watch?v=xAMgzi0b-Ic&t=82s" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+            </div>
+          </article>
+
+          <article class="record-card">
+            <div class="record-video">
+              <div class="youtube-embed" data-id="3mBLez9E9w8" data-start="1" data-title="Platinum Adventure completion by Aven" data-url="https://www.youtube.com/watch?v=3mBLez9E9w8&t=1s"></div>
+            </div>
+            <div class="record-copy">
+              <h3>Platinum Adventure — Completed by Aven</h3>
+              <p>Aven completes Platinum Adventure, currently the final and easiest placement on the Local Demonlist.</p>
+              <div class="record-meta"><span class="record-tag">#19 on the list</span><span class="record-tag">Easy Demon</span><span class="record-tag">Aven</span></div>
+              <a class="record-link" href="https://www.youtube.com/watch?v=3mBLez9E9w8&t=1s" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+
+      <section id="newsPage" class="hidden">
+        <div class="topbar">
+          <div><h2>News</h2><p>Updates and announcements from the Local Demonlist.</p></div>
+        </div>
+        <div class="card">
+          <div class="detail" style="padding:32px; text-align:center;">
+            <h3 style="margin:0 0 10px; font-size:22px;">There is no news now. Sorry!</h3>
+          </div>
+        </div>
+      </section>
+
+      <section id="submitPage" class="hidden">
+        <div class="topbar">
+          <div><h2>Level Submissions</h2><p>Submit new levels and discuss placements through the official LDL Discord server.</p></div>
+        </div>
+        <a class="submit-invite" href="https://discord.gg/DCNqFjxSq" target="_blank" rel="noopener noreferrer">
+          <div class="discord-logo" aria-hidden="true">
+            <img src="discord-logo-small.png" alt="">
+          </div>
+          <div class="submit-invite-copy">
+            <h3>LDL Level Submissions Server Invite</h3>
+            <p>Click to join the Discord server and submit a level for the Local Demonlist.</p>
+          </div>
+          <div class="submit-arrow" aria-hidden="true">→</div>
+        </a>
+      </section>
+
+      <section id="rulesPage" class="hidden">
+        <div class="topbar"><div><h2>Demonlist Rules</h2><p>Rules for submitting completions and keeping the list fair.</p></div></div>
+        <div class="card">
+          <div class="card-head"><h3>Completion requirements</h3></div>
+          <div class="detail">
+            <div class="rules-grid">
+              <div class="rule-card"><div class="rule-number">01</div><div><h3>Complete the level from 0–100%</h3><p>Practice runs, start-position runs, segmented runs, and percentage-only progress do not count as completions.</p></div></div>
+              <div class="rule-card"><div class="rule-number">02</div><div><h3>No cheating</h3><p>Noclip, speedhacks, macros, bots, hitbox abuse, or any other tool that makes the completion illegitimate is not allowed.</p></div></div>
+              <div class="rule-card"><div class="rule-number">03</div><div><h3>Provide proof when requested</h3><p>A video is strongly recommended for every completion and may be required for high placements, disputed runs, or new players.</p></div></div>
+              <div class="rule-card"><div class="rule-number">04</div><div><h3>The level must be unchanged</h3><p>Copies are allowed only when the gameplay is identical to the original. Nerfed, altered, or easier versions do not count.</p></div></div>
+              <div class="rule-card"><div class="rule-number">05</div><div><h3>Allowed quality-of-life mods only</h3><p>Mods such as FPS bypass, click-between-frames, texture packs, and visual fixes are allowed as long as they do not automate gameplay or reduce difficulty.</p></div></div>
+              <div class="rule-card"><div class="rule-number">06</div><div><h3>One record per player per level</h3><p>Each player can earn points for a level once. Rebeats can replace an old video but do not give extra points.</p></div></div>
+              <div class="rule-card"><div class="rule-number">07</div><div><h3>Rankings are decided by the group</h3><p>Placements are based on the opinions and experiences of local players. Levels may move when more people beat them or the group agrees the order is wrong.</p></div></div>
+              <div class="rule-card"><div class="rule-number">08</div><div><h3>Be honest and respectful</h3><p>Fake claims, stolen videos, harassment, or repeated arguments over placements can result in a record being rejected or removed.</p></div></div>
+            </div>
+            <div class="rules-note"><strong>Final decisions:</strong> The list owner may ask for extra proof, reject suspicious runs, or update these rules when needed.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="placeholderPage" class="hidden">
+        <div class="topbar"><div><h2 id="placeholderTitle">Coming soon</h2><p id="placeholderText">This page is ready to be built next.</p></div></div>
+        <div class="card"><div class="detail"><div class="detail-banner"><h3>Preview page</h3><p>You can add forms, proof links, approval status, and admin controls here.</p></div></div></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const levels = [
+      {rank:1,name:'Nine Circles',creator:'Zobros',points:100,tier:'Main List',victors:['Aven'],difficulty:'Hard Demon',song:'Nine Circles',thumb:'nine-circles-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=jZEiwDt22Pk'}]},
+      {rank:2,name:'Skeletal Shenanigans',creator:'YoReid & Airzyy',points:94,tier:'Main List',victors:['Cylus'],difficulty:'Medium Demon',song:'Slash Inferno',thumb:'skeletal-shenanigans-thumb.png'},
+      {rank:3,name:'B',creator:'Motleyorc',points:89,tier:'Main List',victors:['Cylus'],difficulty:'Medium Demon',song:'Beep Beep',thumb:'b-thumb.png'},
+      {rank:4,name:'Troll Madness',creator:'zyphur',points:84,tier:'Main List',victors:['Cylus'],difficulty:'Hard Demon',song:'Unknown',thumb:'troll-madness-thumb.png'},
+      {rank:5,name:'Deadlocked',creator:'RobTop',points:78,tier:'Main List',victors:['Aven','Marshall','Cylus'],difficulty:'Demon',song:'Deadlocked',thumb:'deadlocked-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=xAMgzi0b-Ic&t=81s'}]},
+      {rank:6,name:'Theory of Everything 2',creator:'RobTop',points:72,tier:'Main List',victors:['Cylus'],difficulty:'Demon',song:'Theory of Everything 2',thumb:'toe2-thumb.png'},
+      {rank:7,name:'Clubstep',creator:'RobTop',points:67,tier:'Extended List',victors:['Aven','Cylus'],difficulty:'Demon',song:'Clubstep',thumb:'clubstep-thumb.png'},
+      {rank:8,name:'Problematic',creator:'Dhafin',points:62,tier:'Extended List',victors:['Aven'],difficulty:'Easy Demon',song:'Problematic',thumb:'problematic-thumb.png'},
+      {rank:9,name:'Ultra Paracosm',creator:'iiIRulasili',points:56,tier:'Extended List',victors:['Aven'],difficulty:'Easy Demon',song:'Paracosm',thumb:'ultra-paracosm-thumb.png'},
+      {rank:10,name:'xStep v2',creator:'Neptune',points:50,tier:'Extended List',victors:['Cylus'],difficulty:'Easy Demon',song:'xStep',thumb:'xstep-v2-thumb.png'},
+      {rank:11,name:'iSpyWithMyLittleEye',creator:'Voxicat',points:45,tier:'Extended List',victors:['Aven','Ian','Marshall','Cylus'],difficulty:'Easy Demon',song:'iSpyWithMyLittleEye',thumb:'ispy-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=kKN0W1r2gu0&t=13s'}]},
+      {rank:12,name:'Speed Racer',creator:'ZenthicAlpha',points:40,tier:'Legacy List',victors:['Marshall'],difficulty:'Easy Demon',song:'Chaoz Impact',thumb:'speed-racer-thumb.png'},
+      {rank:13,name:'Invisible Clubstep',creator:'Unknown',points:34,tier:'Legacy List',victors:['Cylus'],difficulty:'Easy Demon',song:'Clubstep',thumb:'invisible-clubstep-thumb.png'},
+      {rank:14,name:'NothinG',creator:'iriswolfx',points:28,tier:'Legacy List',victors:['Aven'],difficulty:'Easy Demon',song:'NothinG',thumb:'nothing-thumb.png'},
+      {rank:15,name:'iS',creator:'Grenate',points:23,tier:'Legacy List',victors:['Aven'],difficulty:'Easy Demon',song:'iS',thumb:'is-thumb.png'},
+      {rank:16,name:'Shiver',creator:'SpKale',points:18,tier:'Legacy List',victors:['Ian','Cylus'],difficulty:'Easy Demon',song:'Black Snow',thumb:'shiver-thumb.png'},
+      {rank:17,name:'The Nightmare',creator:'Jax',points:12,tier:'Legacy List',victors:['Cylus'],difficulty:'Easy Demon',song:'Polargeist',thumb:'the-nightmare-thumb.png'},
+      {rank:18,name:'The Lightning Road',creator:'Timeless Real',points:6,tier:'Legacy List',victors:['Ian','Cylus'],difficulty:'Easy Demon',song:'Dry Out',thumb:'the-lightning-road-thumb.png'},
+      {rank:19,name:'Platinum Adventure',creator:'Jerry4',points:1,tier:'Legacy List',victors:['Aven','Ian','Marshall','Cylus'],difficulty:'Easy Demon',song:'Platinum Adventure',thumb:'platinum-adventure-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=3mBLez9E9w8'}]}
+    ];
+
+    const playerSocials = {
+      Aven: [
+        {label:'YouTube',url:'https://www.youtube.com/@Avenish2'},
+        {label:'Twitch',url:'https://www.twitch.tv/aven_gd'}
+      ],
+      Ian: [
+        {label:'YouTube',url:'https://www.youtube.com/@ianeditzz123'},
+        {label:'Twitch',url:'https://www.twitch.tv/ianlambert05'}
+      ],
+      Marshall: [],
+      Cylus: [
+        {label:'YouTube',url:'https://www.youtube.com/@CylusLambert'}
+      ]
+    };
+
+    const players = [
+      {name:'Cylus',points:650,records:13},
+      {name:'Aven',points:460,records:9},
+      {name:'Marshall',points:164,records:4},
+      {name:'Ian',points:70,records:4}
+    ];
+
+    const list = document.getElementById('levelList');
+    const detail = document.getElementById('detailPanel');
+    const search = document.getElementById('search');
+    const tierFilter = document.getElementById('tierFilter');
+    const resultCount = document.getElementById('resultCount');
+
+    function renderLevels(items) {
+      list.innerHTML = items.map((l,i)=>`
+        <div class="level-row ${i===0?'selected':''}" data-name="${l.name}">
+          <div class="rank">#${l.rank}</div>
+          <div class="thumb ${l.thumb ? 'image-thumb' : ''}">${l.thumb ? `<img src="${l.thumb}" alt="${l.name} thumbnail">` : l.tier.split(' ')[0]}</div>
+          <div class="level-info"><h4>${l.name}</h4><p>by ${l.creator} • Victors: ${l.victors.join(', ')}</p></div>
+          <div class="points">${l.points}<small>list points</small></div>
+        </div>`).join('');
+      resultCount.textContent = `${items.length} level${items.length===1?'':'s'}`;
+      document.querySelectorAll('.level-row').forEach(row=>row.addEventListener('click',()=>{
+        document.querySelectorAll('.level-row').forEach(r=>r.classList.remove('selected'));
+        row.classList.add('selected');
+        const level = levels.find(x=>x.name===row.dataset.name);
+        renderDetail(level);
+      }));
+      if (items.length) renderDetail(items[0]); else detail.innerHTML='<p style="color:var(--muted)">No matching levels.</p>';
+    }
+
+    function renderDetail(l) {
+      const bannerStyle = l.thumb
+        ? `style="background-image: linear-gradient(to top, rgba(8,10,15,.92), rgba(8,10,15,.18)), url('${l.thumb}')"`
+        : '';
+      detail.innerHTML = `
+        <div class="detail-banner" ${bannerStyle}><h3>#${l.rank} ${l.name}</h3><p>${l.difficulty} • ${l.tier}</p></div>
+        <div class="meta">
+          <div><span>Creator</span><strong>${l.creator}</strong></div>
+          <div><span>Victors</span><strong>${l.victors.join(', ')}</strong></div>
+          <div><span>List points</span><strong>${l.points}</strong></div>
+          <div><span>Song</span><strong>${l.song}</strong></div>
+        </div>
+        <div style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Victors</div>
+        <div class="victors">${l.victors.map(v=>`
+          <div class="victor-wrap">
+            <button type="button" class="victor" data-victor="${v}" aria-expanded="false">${v}</button>
+          </div>
+        `).join('')}</div>
+        ${l.completionVideos?.length ? `
+          <div class="video-actions">
+            ${l.completionVideos.map(video=>`
+              <a class="video-button" href="${video.url}" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                Watch ${video.victor}'s completion
+              </a>
+            `).join('')}
+          </div>
+        ` : ''}`;
+      bindVictorPopups();
+    }
+
+
+    function closeSocialPopups(exceptButton=null) {
+      document.querySelectorAll('.social-popup').forEach(popup=>popup.remove());
+      document.querySelectorAll('.victor[aria-expanded="true"]').forEach(btn=>{
+        if (btn !== exceptButton) btn.setAttribute('aria-expanded','false');
+      });
+    }
+
+    function bindVictorPopups() {
+      document.querySelectorAll('.victor').forEach(button=>button.addEventListener('click', event=>{
+        event.stopPropagation();
+        const alreadyOpen = button.getAttribute('aria-expanded') === 'true';
+        closeSocialPopups(button);
+        if (alreadyOpen) {
+          button.setAttribute('aria-expanded','false');
+          return;
+        }
+
+        button.setAttribute('aria-expanded','true');
+        const name = button.dataset.victor;
+        const links = playerSocials[name] || [];
+        const popup = document.createElement('div');
+        popup.className = 'social-popup';
+        popup.innerHTML = `
+          <h4>Socials</h4>
+          ${links.length ? `<div class="social-links">${links.map(link=>`
+            <a class="social-link" href="${link.url}" target="_blank" rel="noopener noreferrer">
+              <span>${link.label}</span><span>↗</span>
+            </a>`).join('')}</div>` : `<div class="social-empty">No channels added yet.</div>`}
+        `;
+        button.closest('.victor-wrap').appendChild(popup);
+      }));
+    }
+
+    document.addEventListener('click', ()=>closeSocialPopups());
+    document.addEventListener('keydown', event=>{
+      if (event.key === 'Escape') closeSocialPopups();
+    });
+
+
+    function initializeYouTubeEmbeds() {
+      const canEmbed = location.protocol === 'http:' || location.protocol === 'https:';
+      const note = document.getElementById('localPreviewNote');
+      if (!canEmbed && note) {
+        note.className = 'local-preview-note';
+        note.textContent = 'YouTube blocks embedded playback when this page is opened directly as a local file. The videos will play inside the site once it is hosted, or when you open it using the included serve.bat file.';
+      }
+      document.querySelectorAll('.youtube-embed').forEach(holder => {
+        const id = holder.dataset.id;
+        const start = holder.dataset.start;
+        const title = holder.dataset.title;
+        const url = holder.dataset.url;
+        if (canEmbed) {
+          const iframe = document.createElement('iframe');
+          iframe.src = `https://www.youtube.com/embed/${id}${start ? `?start=${start}` : ''}`;
+          iframe.title = title;
+          iframe.loading = 'lazy';
+          iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.allowFullscreen = true;
+          holder.replaceWith(iframe);
+        } else {
+          const link = document.createElement('a');
+          link.className = 'record-fallback';
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.setAttribute('aria-label', `Watch ${title} on YouTube`);
+          link.innerHTML = `<img src="https://i.ytimg.com/vi/${id}/maxresdefault.jpg" alt="${title} thumbnail">`;
+          holder.replaceWith(link);
+        }
+      });
+    }
+
+    function applyFilters(){
+      const q=search.value.toLowerCase(); const tier=tierFilter.value;
+      const filtered=levels.filter(l=>{
+        const matches=[l.name,l.creator,...l.victors].join(' ').toLowerCase().includes(q);
+        return matches && (tier==='all'||l.tier===tier);
+      });
+      renderLevels(filtered);
+    }
+    search.addEventListener('input',applyFilters); tierFilter.addEventListener('change',applyFilters);
+
+    document.getElementById('leaderboard').innerHTML = players.map((p,i)=>`
+      <div class="player"><div class="avatar">${i+1}</div><div><strong>${p.name}</strong><span>${p.records} accepted records</span></div><div class="score">${p.points}</div></div>`).join('');
+
+    document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+      document.getElementById('listPage').classList.add('hidden');
+      document.getElementById('playersPage').classList.add('hidden');
+      document.getElementById('recordsPage').classList.add('hidden');
+      document.getElementById('newsPage').classList.add('hidden');
+      document.getElementById('rulesPage').classList.add('hidden');
+      document.getElementById('submitPage').classList.add('hidden');
+      document.getElementById('placeholderPage').classList.add('hidden');
+      const page=btn.dataset.page;
+      if(page==='list') document.getElementById('listPage').classList.remove('hidden');
+      else if(page==='players') document.getElementById('playersPage').classList.remove('hidden');
+      else if(page==='records') document.getElementById('recordsPage').classList.remove('hidden');
+      else if(page==='news') document.getElementById('newsPage').classList.remove('hidden');
+      else if(page==='rules') document.getElementById('rulesPage').classList.remove('hidden');
+      else if(page==='submit') document.getElementById('submitPage').classList.remove('hidden');
+      else {
+        document.getElementById('placeholderPage').classList.remove('hidden');
+        const labels={};
+        document.getElementById('placeholderTitle').textContent=labels[page]?.[0] || 'Coming soon'; document.getElementById('placeholderText').textContent=labels[page]?.[1] || 'This page is ready to be built next.';
+      }
+    }));
+
+    initializeYouTubeEmbeds();
+    renderLevels(levels);
+  </script>
+</body>
+</html>
