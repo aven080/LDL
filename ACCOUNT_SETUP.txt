@@ -1,0 +1,19 @@
+LOCAL DEMONLIST ACCOUNT SETUP
+
+1. In Supabase, open SQL Editor.
+2. Create a new query.
+3. Paste the entire contents of supabase-setup.sql.
+4. Click Run.
+5. In Authentication -> URL Configuration, set:
+   Site URL: https://localdemonlist.com
+   Redirect URLs: https://localdemonlist.com/**
+6. Upload all updated website files to GitHub.
+
+APPROVING A PROFILE CLAIM
+1. Open Supabase Table Editor -> profile_claims.
+2. Find a row where status is pending and copy its id.
+3. Open SQL Editor and run:
+   select public.approve_profile_claim('PASTE-CLAIM-ID-HERE');
+4. The user's account will then be linked to the existing player profile.
+
+Never expose or upload a secret key or service_role key. The publishable key in index.html is expected to be public.

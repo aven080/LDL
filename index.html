@@ -71,6 +71,16 @@
     }
     .nav button:hover, .nav button.active { background: var(--panel-2); color: var(--text); }
     .nav button.active { box-shadow: inset 3px 0 0 var(--accent); }
+    .nav button { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .nav-alert {
+      width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
+      background: #ff3b4f; box-shadow: 0 0 0 3px rgba(255,59,79,.14), 0 0 12px rgba(255,59,79,.85);
+      animation: alertPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes alertPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(.82); opacity: .72; }
+    }
     .side-note {
       position: absolute; left: 18px; right: 18px; bottom: 18px;
       background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
@@ -284,13 +294,48 @@
       .submit-invite-copy h3 { font-size:19px; }
       .submit-arrow { display:none; }
     }
+
+    .account-shell { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,.8fr); gap:18px; }
+    .account-panel { padding:22px; }
+    .account-panel h3 { margin:0 0 8px; }
+    .account-panel p { color:var(--muted); line-height:1.55; margin:0 0 18px; }
+    .auth-tabs { display:flex; gap:8px; margin-bottom:16px; }
+    .auth-tab { border:1px solid var(--line); background:var(--panel-2); color:var(--muted); padding:9px 12px; border-radius:9px; cursor:pointer; font-weight:700; }
+    .auth-tab.active { color:var(--text); border-color:rgba(93,169,255,.5); background:rgba(93,169,255,.12); }
+    .account-form { display:grid; gap:12px; }
+    .account-field { display:grid; gap:6px; }
+    .account-field label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:700; }
+    .account-field input, .account-field select {
+      width:100%; min-width:0; background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+      border-radius:10px; padding:12px 13px; outline:none;
+    }
+    .account-field input:focus, .account-field select:focus { border-color:rgba(93,169,255,.65); box-shadow:0 0 0 3px rgba(93,169,255,.1); }
+    .account-button { border:1px solid rgba(93,169,255,.38); background:linear-gradient(135deg,rgba(93,169,255,.28),rgba(139,92,246,.24)); color:var(--text); padding:11px 14px; border-radius:10px; cursor:pointer; font-weight:800; }
+    .account-button:hover { transform:translateY(-1px); }
+    .account-button.secondary { background:var(--panel-2); border-color:var(--line); }
+    .account-button.danger { border-color:rgba(255,93,115,.4); background:rgba(255,93,115,.1); color:#ff9aaa; }
+    .account-status { margin-top:14px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; display:none; }
+    .account-status.show { display:block; }
+    .account-status.info { background:rgba(93,169,255,.1); border:1px solid rgba(93,169,255,.28); color:#b9dbff; }
+    .account-status.success { background:rgba(66,211,146,.1); border:1px solid rgba(66,211,146,.28); color:#95efc2; }
+    .account-status.error { background:rgba(255,93,115,.1); border:1px solid rgba(255,93,115,.28); color:#ff9aaa; }
+    .account-summary { display:grid; gap:12px; }
+    .account-summary-row { background:var(--panel-2); border:1px solid var(--line); border-radius:11px; padding:13px; }
+    .account-summary-row span { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+    .account-summary-row strong { display:block; margin-top:5px; font-size:14px; }
+    .claim-card { margin-top:16px; padding:16px; border-radius:12px; border:1px solid var(--line); background:rgba(25,31,43,.72); }
+    .claim-card h4 { margin:0 0 6px; }
+    .claim-card p { margin:0 0 14px; font-size:12px; }
+    .account-chip { display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:999px; background:rgba(66,211,146,.1); border:1px solid rgba(66,211,146,.25); color:#8ce8ba; font-size:11px; font-weight:800; }
+    .account-nav-user { color:#8ce8ba; font-size:10px; font-weight:800; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    @media (max-width:980px) { .account-shell { grid-template-columns:1fr; } }
     .hidden { display:none !important; }
     @media (max-width: 980px) {
       .site-header { height: 165px; padding: 14px 20px; }
       .site-header img { max-height: 140px; }
       .app { grid-template-columns: 1fr; min-height: calc(100vh - 165px); }
       .sidebar { position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
-      .nav { grid-template-columns: repeat(6, 1fr); }
+      .nav { grid-template-columns: repeat(7, 1fr); }
       .nav button { text-align:center; padding:10px 6px; font-size:12px; }
       .side-note { display:none; }
       .content-grid { grid-template-columns: 1fr; }
@@ -307,6 +352,7 @@
       .thumb { height:46px; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header class="site-header">
@@ -324,6 +370,7 @@
         <button data-page="news">News</button>
         <button data-page="submit">Submit</button>
         <button data-page="rules">Rules</button>
+        <button data-page="account"><span>Account</span><span class="account-nav-user" id="accountNavUser"></span></button>
       </nav>
       <div class="side-note">Local Geometry Dash demon rankings for Aven and friends.</div>
     </aside>
@@ -544,6 +591,56 @@
         </div>
       </section>
 
+
+      <section id="accountPage" class="hidden">
+        <div class="topbar">
+          <div><h2>Account</h2><p>Create an account, sign in, and claim an existing Local Demonlist player profile.</p></div>
+        </div>
+        <div class="account-shell">
+          <div class="card">
+            <div class="card-head"><h3>Sign in</h3><span>Supabase Auth</span></div>
+            <div class="account-panel" id="authPanel">
+              <div class="auth-tabs">
+                <button class="auth-tab active" type="button" data-auth-mode="login">Log in</button>
+                <button class="auth-tab" type="button" data-auth-mode="signup">Create account</button>
+              </div>
+              <form class="account-form" id="authForm">
+                <div class="account-field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required></div>
+                <div class="account-field"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required></div>
+                <button class="account-button" id="authSubmit" type="submit">Log in</button>
+              </form>
+              <div class="account-status" id="authStatus"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Your profile</h3><span id="accountStateLabel">Signed out</span></div>
+            <div class="account-panel">
+              <div id="signedOutSummary">
+                <p>Sign in first. Your account can then be linked to one of the existing player profiles without losing any points, records, videos, or socials.</p>
+              </div>
+              <div id="signedInSummary" class="hidden">
+                <div class="account-summary">
+                  <div class="account-summary-row"><span>Email</span><strong id="accountEmail">—</strong></div>
+                  <div class="account-summary-row"><span>Linked player</span><strong id="linkedPlayerName">Not linked yet</strong></div>
+                  <div class="account-summary-row"><span>Claim status</span><strong id="claimStatusText">No claim submitted</strong></div>
+                </div>
+                <div class="claim-card" id="claimCard">
+                  <h4>Claim an existing profile</h4>
+                  <p>Select your existing player name. A claim stays pending until Aven approves it in Supabase, preventing somebody else from stealing your profile.</p>
+                  <form class="account-form" id="claimForm">
+                    <div class="account-field"><label for="claimProfile">Player profile</label><select id="claimProfile" required><option value="">Loading profiles…</option></select></div>
+                    <button class="account-button" type="submit">Request profile claim</button>
+                  </form>
+                  <div class="account-status" id="claimStatus"></div>
+                </div>
+                <button class="account-button danger" id="logoutButton" type="button" style="margin-top:16px">Log out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="placeholderPage" class="hidden">
         <div class="topbar"><div><h2 id="placeholderTitle">Coming soon</h2><p id="placeholderText">This page is ready to be built next.</p></div></div>
         <div class="card"><div class="detail"><div class="detail-banner"><h3>Preview page</h3><p>You can add forms, proof links, approval status, and admin controls here.</p></div></div></div>
@@ -738,14 +835,54 @@
     document.getElementById('leaderboard').innerHTML = players.map((p,i)=>`
       <div class="player"><div class="avatar">${i+1}</div><div><strong>${p.name}</strong><span>${p.records} accepted records</span></div><div class="score">${p.points}</div></div>`).join('');
 
+    const tabContentVersions = {
+      list: 1,
+      players: 1,
+      records: 1,
+      news: 1,
+      submit: 1,
+      rules: 1,
+      account: 1
+    };
+
+    function alertStorageKey(page) {
+      return `ldl-read-${page}`;
+    }
+
+    function refreshTabAlerts() {
+      document.querySelectorAll('.nav button').forEach(btn => {
+        const page = btn.dataset.page;
+        const currentVersion = tabContentVersions[page] || 0;
+        const readVersion = Number(localStorage.getItem(alertStorageKey(page)) || 0);
+        let dot = btn.querySelector('.nav-alert');
+        if (currentVersion > readVersion) {
+          if (!dot) {
+            dot = document.createElement('span');
+            dot.className = 'nav-alert';
+            dot.setAttribute('aria-label', 'New content');
+            btn.appendChild(dot);
+          }
+        } else if (dot) {
+          dot.remove();
+        }
+      });
+    }
+
+    function markTabRead(page) {
+      localStorage.setItem(alertStorageKey(page), String(tabContentVersions[page] || 0));
+      refreshTabAlerts();
+    }
+
     document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{
       document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+      markTabRead(btn.dataset.page);
       document.getElementById('listPage').classList.add('hidden');
       document.getElementById('playersPage').classList.add('hidden');
       document.getElementById('recordsPage').classList.add('hidden');
       document.getElementById('newsPage').classList.add('hidden');
       document.getElementById('rulesPage').classList.add('hidden');
       document.getElementById('submitPage').classList.add('hidden');
+      document.getElementById('accountPage').classList.add('hidden');
       document.getElementById('placeholderPage').classList.add('hidden');
       const page=btn.dataset.page;
       if(page==='list') document.getElementById('listPage').classList.remove('hidden');
@@ -754,6 +891,7 @@
       else if(page==='news') document.getElementById('newsPage').classList.remove('hidden');
       else if(page==='rules') document.getElementById('rulesPage').classList.remove('hidden');
       else if(page==='submit') document.getElementById('submitPage').classList.remove('hidden');
+      else if(page==='account') document.getElementById('accountPage').classList.remove('hidden');
       else {
         document.getElementById('placeholderPage').classList.remove('hidden');
         const labels={};
@@ -761,8 +899,173 @@
       }
     }));
 
+
+    const SUPABASE_URL = 'https://ptqavaufegagsuiphekhn.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qp-CB-Jdxu5n5tVTU_eAxQ_ss7bRGhx';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    let authMode = 'login';
+
+    const authPanel = document.getElementById('authPanel');
+    const authForm = document.getElementById('authForm');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSubmit = document.getElementById('authSubmit');
+    const authStatus = document.getElementById('authStatus');
+    const signedOutSummary = document.getElementById('signedOutSummary');
+    const signedInSummary = document.getElementById('signedInSummary');
+    const accountStateLabel = document.getElementById('accountStateLabel');
+    const accountEmail = document.getElementById('accountEmail');
+    const linkedPlayerName = document.getElementById('linkedPlayerName');
+    const claimStatusText = document.getElementById('claimStatusText');
+    const claimCard = document.getElementById('claimCard');
+    const claimForm = document.getElementById('claimForm');
+    const claimProfile = document.getElementById('claimProfile');
+    const claimStatus = document.getElementById('claimStatus');
+    const logoutButton = document.getElementById('logoutButton');
+    const accountNavUser = document.getElementById('accountNavUser');
+
+    function showAccountStatus(element, message, type='info') {
+      element.textContent = message;
+      element.className = `account-status show ${type}`;
+    }
+
+    function clearAccountStatus(element) {
+      element.textContent = '';
+      element.className = 'account-status';
+    }
+
+    document.querySelectorAll('[data-auth-mode]').forEach(tab => tab.addEventListener('click', () => {
+      authMode = tab.dataset.authMode;
+      document.querySelectorAll('[data-auth-mode]').forEach(t => t.classList.toggle('active', t === tab));
+      authSubmit.textContent = authMode === 'login' ? 'Log in' : 'Create account';
+      authPassword.autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
+      clearAccountStatus(authStatus);
+    }));
+
+    authForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearAccountStatus(authStatus);
+      authSubmit.disabled = true;
+      authSubmit.textContent = authMode === 'login' ? 'Logging in…' : 'Creating account…';
+      try {
+        if (authMode === 'signup') {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          });
+          if (error) throw error;
+          if (data.session) showAccountStatus(authStatus, 'Account created and signed in.', 'success');
+          else showAccountStatus(authStatus, 'Account created. Check your email for the confirmation link, then log in.', 'success');
+        } else {
+          const { error } = await supabaseClient.auth.signInWithPassword({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          });
+          if (error) throw error;
+          showAccountStatus(authStatus, 'Logged in successfully.', 'success');
+        }
+      } catch (error) {
+        showAccountStatus(authStatus, error.message || 'Account request failed.', 'error');
+      } finally {
+        authSubmit.disabled = false;
+        authSubmit.textContent = authMode === 'login' ? 'Log in' : 'Create account';
+      }
+    });
+
+    logoutButton.addEventListener('click', async () => {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) showAccountStatus(claimStatus, error.message, 'error');
+    });
+
+    async function loadClaimableProfiles() {
+      const { data, error } = await supabaseClient
+        .from('player_profiles')
+        .select('id, display_name, user_id')
+        .is('user_id', null)
+        .order('display_name');
+      if (error) throw error;
+      claimProfile.innerHTML = '<option value="">Choose your player name…</option>' +
+        data.map(profile => `<option value="${profile.id}">${profile.display_name}</option>`).join('');
+    }
+
+    async function loadAccountState(session) {
+      clearAccountStatus(claimStatus);
+      const user = session?.user || null;
+      signedOutSummary.classList.toggle('hidden', !!user);
+      signedInSummary.classList.toggle('hidden', !user);
+      authPanel.classList.toggle('hidden', !!user);
+      accountStateLabel.textContent = user ? 'Signed in' : 'Signed out';
+      accountNavUser.textContent = user ? 'Signed in' : '';
+      if (!user) return;
+
+      accountEmail.textContent = user.email || 'Signed-in user';
+      accountNavUser.textContent = user.email?.split('@')[0] || 'Account';
+
+      try {
+        const { data: linked, error: linkedError } = await supabaseClient
+          .from('player_profiles')
+          .select('id, display_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (linkedError) throw linkedError;
+
+        if (linked) {
+          linkedPlayerName.textContent = linked.display_name;
+          claimStatusText.innerHTML = '<span class="account-chip">Linked</span>';
+          claimCard.classList.add('hidden');
+          return;
+        }
+
+        linkedPlayerName.textContent = 'Not linked yet';
+        const { data: claim, error: claimError } = await supabaseClient
+          .from('profile_claims')
+          .select('status, player_profiles(display_name)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending:false })
+          .limit(1)
+          .maybeSingle();
+        if (claimError) throw claimError;
+
+        if (claim) {
+          const requestedName = claim.player_profiles?.display_name || 'selected profile';
+          claimStatusText.textContent = `${claim.status.charAt(0).toUpperCase()+claim.status.slice(1)} — ${requestedName}`;
+          claimCard.classList.toggle('hidden', claim.status === 'pending');
+        } else {
+          claimStatusText.textContent = 'No claim submitted';
+          claimCard.classList.remove('hidden');
+        }
+        await loadClaimableProfiles();
+      } catch (error) {
+        linkedPlayerName.textContent = 'Database setup required';
+        claimStatusText.textContent = 'Run supabase-setup.sql in the Supabase SQL Editor';
+        claimCard.classList.add('hidden');
+        showAccountStatus(claimStatus, error.message || 'Could not load profile data.', 'error');
+      }
+    }
+
+    claimForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearAccountStatus(claimStatus);
+      const profileId = claimProfile.value;
+      if (!profileId) return showAccountStatus(claimStatus, 'Choose your player profile first.', 'error');
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return showAccountStatus(claimStatus, 'Log in before submitting a claim.', 'error');
+      const { error } = await supabaseClient.from('profile_claims').insert({ user_id:user.id, profile_id:profileId });
+      if (error) return showAccountStatus(claimStatus, error.message, 'error');
+      showAccountStatus(claimStatus, 'Claim submitted. Aven must approve it in Supabase.', 'success');
+      await loadAccountState((await supabaseClient.auth.getSession()).data.session);
+    });
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => loadAccountState(session), 0);
+    });
+
+    supabaseClient.auth.getSession().then(({ data }) => loadAccountState(data.session));
+
     initializeYouTubeEmbeds();
     renderLevels(levels);
+    markTabRead('list');
+    refreshTabAlerts();
   </script>
 </body>
 </html>
