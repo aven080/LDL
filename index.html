@@ -1410,7 +1410,12 @@
         showAccountStatus(avatarStatus, 'Profile picture updated.', 'success');
         await loadRegisteredAccounts();
       } catch (error) {
-        showAccountStatus(avatarStatus, error.message || 'Could not upload the profile picture.', 'error');
+        const message = error?.message || 'Could not upload the profile picture.';
+        if (/bucket not found/i.test(message)) {
+          showAccountStatus(avatarStatus, 'Profile-picture storage has not been set up yet. Run profile-picture-setup.sql once in the Supabase SQL Editor, then try again.', 'error');
+        } else {
+          showAccountStatus(avatarStatus, message, 'error');
+        }
       } finally {
         avatarSubmit.disabled = false;
         avatarSubmit.textContent = 'Upload profile picture';
