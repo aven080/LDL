@@ -216,9 +216,11 @@
       position:relative; width:100%; aspect-ratio:16 / 9; background:#050608;
       border-bottom:1px solid var(--line);
     }
-    .record-video iframe {
+    .record-video iframe,
+    .record-video img {
       position:absolute; inset:0; width:100%; height:100%; border:0;
     }
+    .record-video img { object-fit:cover; display:block; }
     .record-fallback {
       position:absolute; inset:0; display:grid; place-items:center; overflow:hidden;
       background:#050608;
@@ -630,6 +632,21 @@
           </article>
           </div>
         </div>
+        <div id="platformerRecordsContent" class="hidden">
+          <div class="records-feed">
+            <article class="record-card">
+              <div class="record-video">
+                <div class="youtube-embed" data-id="z7E4P8FZSWk" data-title="Forsaken City completion by Cylus" data-url="https://www.youtube.com/watch?v=z7E4P8FZSWk"></div>
+              </div>
+              <div class="record-copy">
+                <h3>Forsaken City — Completed by Cylus</h3>
+                <p>Cylus completed Forsaken City in 17:43.354, making it the first accepted record on the Local Platformer Demonlist.</p>
+                <div class="record-meta"><span class="record-tag">#1 on the platformer list</span><span class="record-tag">Easy Demon</span><span class="record-tag">17:43.354</span><span class="record-tag">Cylus</span></div>
+                <a class="record-link" href="https://www.youtube.com/watch?v=z7E4P8FZSWk" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+              </div>
+            </article>
+          </div>
+        </div>
         <div class="card hidden" id="platformerRecordsEmpty"><div class="empty-mode-card"><h3>There are currently no platformer completion videos.</h3><p>Platformer records will appear here after somebody beats a platformer demon.</p></div></div>
       </section>
 
@@ -638,6 +655,18 @@
       <section id="newsPage" class="hidden">
         <div class="topbar">
           <div><h2>News</h2><p>Updates and announcements from the Local Demonlist.</p></div>
+        </div>
+        <div class="card">
+          <div class="detail" style="padding:32px;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap;">
+              <div>
+                <div style="color:var(--accent); font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px;">Platformer update</div>
+                <h3 style="margin:0 0 10px; font-size:24px;">The first platformer demon record is now on the list</h3>
+                <p style="margin:0; color:var(--muted); line-height:1.65; max-width:760px;">Cylus beat Forsaken City in 17:43.354. The Platformer Demonlist now has its first level, first victor, first player points, and first record entry.</p>
+              </div>
+              <div class="pill">July 24, 2026</div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="detail" style="padding:32px;">
@@ -798,6 +827,10 @@
       {rank:19,name:'Platinum Adventure',creator:'Jerry4',points:1,tier:'Legacy List',victors:['Aven','Ian','Marshall','Cylus'],difficulty:'Easy Demon',song:'Platinum Adventure',thumb:'platinum-adventure-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=3mBLez9E9w8'},{victor:'Cylus',url:'https://youtu.be/JZnO8OuAgt8'}]}
     ];
 
+    const platformerLevels = [
+      {rank:1,name:'Forsaken City',creator:'lightpotatodev',points:100,tier:'Main List',victors:['Cylus'],difficulty:'Easy Demon',song:'Winter Solstice',thumb:'forsaken-city-thumb.png',bestTime:'17:43.354',completionVideos:[{victor:'Cylus',url:'https://www.youtube.com/watch?v=z7E4P8FZSWk'}]}
+    ];
+
     const playerSocials = {
       Aven: [
         {label:'YouTube',url:'https://www.youtube.com/@Avenish2'},
@@ -820,11 +853,28 @@
       {name:'Ian',points:93,records:5}
     ];
 
+    const platformerPlayers = [
+      {name:'Cylus',points:100,records:1}
+    ];
+
     const list = document.getElementById('levelList');
     const detail = document.getElementById('detailPanel');
     const search = document.getElementById('search');
     const tierFilter = document.getElementById('tierFilter');
     const resultCount = document.getElementById('resultCount');
+
+    function getCurrentLevels() {
+      return demonlistMode === 'platformer' ? platformerLevels : levels;
+    }
+
+    function getCurrentPlayers() {
+      return demonlistMode === 'platformer' ? platformerPlayers : players;
+    }
+
+    function renderLeaderboard(items) {
+      document.getElementById('leaderboard').innerHTML = items.map((p,i)=>`
+        <div class="player"><div class="avatar">${i+1}</div><div><strong>${p.name}</strong><span>${p.records} accepted record${p.records===1?'':'s'}</span></div><div class="score">${p.points}</div></div>`).join('');
+    }
 
     function renderLevels(items) {
       list.innerHTML = items.map((l,i)=>`
@@ -838,7 +888,7 @@
       document.querySelectorAll('.level-row').forEach(row=>row.addEventListener('click',()=>{
         document.querySelectorAll('.level-row').forEach(r=>r.classList.remove('selected'));
         row.classList.add('selected');
-        const level = levels.find(x=>x.name===row.dataset.name);
+        const level = getCurrentLevels().find(x=>x.name===row.dataset.name);
         renderDetail(level);
       }));
       if (items.length) renderDetail(items[0]); else detail.innerHTML='<p style="color:var(--muted)">No matching levels.</p>';
@@ -855,6 +905,7 @@
           <div><span>Victors</span><strong>${l.victors.join(', ')}</strong></div>
           <div><span>List points</span><strong>${l.points}</strong></div>
           <div><span>Song</span><strong>${l.song}</strong></div>
+          ${l.bestTime ? `<div><span>Best time</span><strong>${l.bestTime}</strong></div>` : ''}
         </div>
         <div style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Victors</div>
         <div class="victors">${l.victors.map(v=>`
@@ -951,16 +1002,13 @@
 
     function applyFilters(){
       const q=search.value.toLowerCase(); const tier=tierFilter.value;
-      const filtered=levels.filter(l=>{
+      const filtered=getCurrentLevels().filter(l=>{
         const matches=[l.name,l.creator,...l.victors].join(' ').toLowerCase().includes(q);
         return matches && (tier==='all'||l.tier===tier);
       });
       renderLevels(filtered);
     }
     search.addEventListener('input',applyFilters); tierFilter.addEventListener('change',applyFilters);
-
-    document.getElementById('leaderboard').innerHTML = players.map((p,i)=>`
-      <div class="player"><div class="avatar">${i+1}</div><div><strong>${p.name}</strong><span>${p.records} accepted records</span></div><div class="score">${p.points}</div></div>`).join('');
 
     let demonlistMode = 'normal';
 
@@ -975,24 +1023,34 @@
 
       document.getElementById('listModeTitle').textContent = platformer ? 'Platformer Demonlist' : 'Local Demonlist';
       document.getElementById('listModeSubtitle').textContent = platformer ? 'Platformer demon rankings and platformer-only points.' : 'Ranked by your group’s own difficulty opinions.';
-      document.getElementById('listStatLevels').textContent = platformer ? '0' : '19';
-      document.getElementById('listStatPlayers').textContent = platformer ? '0' : '4';
-      document.getElementById('listStatRecords').textContent = platformer ? '0' : '32';
-      document.getElementById('listStatHardest').textContent = platformer ? 'None yet' : 'Nine Circles';
-      document.querySelector('#listPage .toolbar').classList.toggle('hidden', platformer);
-      document.querySelector('#listPage .content-grid').classList.toggle('hidden', platformer);
-      document.getElementById('platformerListEmpty').classList.toggle('hidden', !platformer);
+      document.getElementById('listStatLevels').textContent = platformer ? '1' : '19';
+      document.getElementById('listStatPlayers').textContent = platformer ? '1' : '4';
+      document.getElementById('listStatRecords').textContent = platformer ? '1' : '33';
+      document.getElementById('listStatHardest').textContent = platformer ? 'Forsaken City' : 'Nine Circles';
+      document.querySelector('#listPage .toolbar').classList.remove('hidden');
+      document.querySelector('#listPage .content-grid').classList.remove('hidden');
+      document.getElementById('platformerListEmpty').classList.add('hidden');
 
       document.getElementById('playersModeTitle').textContent = platformer ? 'Platformer Player Leaderboard' : 'Player Leaderboard';
       document.getElementById('playersModeSubtitle').textContent = platformer ? 'Points earned only from platformer demon completions.' : 'Points are earned by completing ranked levels.';
-      document.getElementById('normalPlayersCard').classList.toggle('hidden', platformer);
-      document.getElementById('platformerPlayersEmpty').classList.toggle('hidden', !platformer);
+      document.getElementById('normalPlayersCard').classList.remove('hidden');
+      document.getElementById('platformerPlayersEmpty').classList.add('hidden');
+      renderLeaderboard(getCurrentPlayers());
 
       document.getElementById('recordsModeTitle').textContent = platformer ? 'Platformer Completion Records' : 'Completion Records';
-      document.getElementById('recordsModeSubtitle').textContent = platformer ? 'Platformer completion videos will appear here.' : 'Watch accepted completions without leaving the Local Demonlist.';
-      document.getElementById('recordsVideoCount').textContent = platformer ? '0 videos' : '10 videos';
+      document.getElementById('recordsModeSubtitle').textContent = platformer ? 'Accepted platformer completions and completion times.' : 'Watch accepted completions without leaving the Local Demonlist.';
+      document.getElementById('recordsVideoCount').textContent = platformer ? '1 record' : '10 videos';
       document.getElementById('normalRecordsContent').classList.toggle('hidden', platformer);
-      document.getElementById('platformerRecordsEmpty').classList.toggle('hidden', !platformer);
+      document.getElementById('platformerRecordsContent').classList.toggle('hidden', !platformer);
+      document.getElementById('platformerRecordsEmpty').classList.add('hidden');
+
+      if (platformer) {
+        search.placeholder = 'Search platformer levels or victors...';
+        tierFilter.value = 'all';
+      } else {
+        search.placeholder = 'Search levels, creators, or victors...';
+      }
+      applyFilters();
     }
 
     document.querySelectorAll('[data-mode-switch]').forEach(button => button.addEventListener('click', () => {
@@ -1001,10 +1059,10 @@
     }));
 
     const tabContentVersions = {
-      list: 1,
-      players: 1,
-      records: 1,
-      news: 2,
+      list: 2,
+      players: 2,
+      records: 2,
+      news: 3,
       submit: 1,
       rules: 1,
       accounts: 1,
@@ -1126,11 +1184,11 @@
     }
 
     function getPlayerStats(name) {
-      return players.find(player => player.name.toLowerCase() === String(name).toLowerCase()) || {name,points:0,records:0};
+      return getCurrentPlayers().find(player => player.name.toLowerCase() === String(name).toLowerCase()) || {name,points:0,records:0};
     }
 
     function getPlayerCompletions(name) {
-      return levels.filter(level => level.victors.includes(name));
+      return getCurrentLevels().filter(level => level.victors.includes(name));
     }
 
     async function loadRegisteredAccounts() {
@@ -1190,7 +1248,7 @@
       publicProfileContent.innerHTML = `
         <div class="public-profile-hero">
           ${avatarMarkup(profile,'large')}
-          <div class="public-profile-copy"><h2>${escapeHtml(profile.display_name)}</h2><p>Registered Local Demonlist player</p></div>
+          <div class="public-profile-copy"><h2>${escapeHtml(profile.display_name)}</h2><p>Registered ${demonlistMode === 'platformer' ? 'Platformer Demonlist' : 'Local Demonlist'} player</p></div>
         </div>
         <div class="profile-stat-grid">
           <div class="profile-stat"><span>List points</span><strong>${stats.points}</strong></div>
@@ -1436,7 +1494,7 @@
 
     initializeYouTubeEmbeds();
     applyDemonlistMode();
-    renderLevels(levels);
+    renderLevels(getCurrentLevels());
     markTabRead('list');
     refreshTabAlerts();
   </script>
