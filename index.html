@@ -1136,16 +1136,28 @@
     async function loadRegisteredAccounts() {
       accountSearchResults.innerHTML = '<div class="account-empty">Loading registered accounts…</div>';
       if (accountSearch.value.trim()) accountSearchResults.classList.remove('hidden');
-      const { data, error } = await supabaseClient
+
+      let result = await supabaseClient
         .from('player_profiles')
         .select('id, slug, display_name, avatar_url')
         .not('user_id', 'is', null)
         .order('display_name');
-      if (error) {
-        accountSearchResults.innerHTML = `<div class="account-empty">${escapeHtml(error.message)}</div>`;
+
+      // Older database setups may not have the optional avatar_url column yet.
+      // Fall back cleanly so normal account/profile features keep working.
+      if (result.error && /avatar_url|column/i.test(result.error.message || '')) {
+        result = await supabaseClient
+          .from('player_profiles')
+          .select('id, slug, display_name')
+          .not('user_id', 'is', null)
+          .order('display_name');
+      }
+
+      if (result.error) {
+        accountSearchResults.innerHTML = `<div class="account-empty">${escapeHtml(result.error.message)}</div>`;
         return;
       }
-      registeredProfiles = data || [];
+      registeredProfiles = (result.data || []).map(profile => ({ avatar_url:null, ...profile }));
       renderRegisteredAccounts();
     }
 
@@ -1284,12 +1296,23 @@
       accountNavUser.textContent = user.email?.split('@')[0] || 'Account';
 
       try {
-        const { data: linked, error: linkedError } = await supabaseClient
+        let linkedResult = await supabaseClient
           .from('player_profiles')
           .select('id, slug, display_name, avatar_url')
           .eq('user_id', user.id)
           .maybeSingle();
-        if (linkedError) throw linkedError;
+
+        // Keep linked accounts working even before the optional profile-picture
+        // database migration has been run.
+        if (linkedResult.error && /avatar_url|column/i.test(linkedResult.error.message || '')) {
+          linkedResult = await supabaseClient
+            .from('player_profiles')
+            .select('id, slug, display_name')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        }
+        if (linkedResult.error) throw linkedResult.error;
+        const linked = linkedResult.data ? { avatar_url:null, ...linkedResult.data } : null;
 
         if (linked) {
           currentLinkedProfile = linked;
@@ -1325,10 +1348,12 @@
         }
         await loadClaimableProfiles();
       } catch (error) {
-        linkedPlayerName.textContent = 'Database setup required';
-        claimStatusText.textContent = 'Run supabase-setup.sql in the Supabase SQL Editor';
+        const message = error?.message || 'Could not load profile data.';
+        linkedPlayerName.textContent = 'Could not load account';
+        claimStatusText.textContent = 'Refresh the page or check the account connection';
         claimCard.classList.add('hidden');
-        showAccountStatus(claimStatus, error.message || 'Could not load profile data.', 'error');
+        showAccountStatus(claimStatus, message, 'error');
+        console.error('Account state load failed:', error);
       }
     }
 
