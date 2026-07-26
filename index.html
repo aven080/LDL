@@ -465,7 +465,7 @@
         <div class="stats">
           <div class="stat"><div class="label">Levels</div><div class="value" id="listStatLevels">19</div></div>
           <div class="stat"><div class="label">Players</div><div class="value" id="listStatPlayers">4</div></div>
-          <div class="stat"><div class="label">Records</div><div class="value" id="listStatRecords">32</div></div>
+          <div class="stat"><div class="label">Records</div><div class="value" id="listStatRecords">34</div></div>
           <div class="stat"><div class="label">Hardest</div><div class="value" id="listStatHardest">Nine Circles</div></div>
         </div>
         <div class="card hidden" id="platformerListEmpty">
@@ -810,7 +810,7 @@
       {rank:2,name:'Skeletal Shenanigans',creator:'YoReid & Airzyy',points:94,tier:'Main List',victors:['Cylus'],difficulty:'Medium Demon',song:'Slash Inferno',thumb:'skeletal-shenanigans-thumb.png',completionVideos:[{victor:'Cylus',url:'https://www.youtube.com/watch?v=f1QGGGsv3iQ'}]},
       {rank:3,name:'B',creator:'Motleyorc',points:89,tier:'Main List',victors:['Cylus','Aven'],difficulty:'Medium Demon',song:'Beep Beep',thumb:'b-thumb.png',completionVideos:[{victor:'Aven',url:'https://youtu.be/8y_sl1glGvw'}]},
       {rank:4,name:'Troll Madness',creator:'zyphur',points:84,tier:'Main List',victors:['Cylus'],difficulty:'Hard Demon',song:'Unknown',thumb:'troll-madness-thumb.png'},
-      {rank:5,name:'Deadlocked',creator:'RobTop',points:78,tier:'Main List',victors:['Aven','Marshall','Cylus'],difficulty:'Demon',song:'Deadlocked',thumb:'deadlocked-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=xAMgzi0b-Ic&t=81s'}]},
+      {rank:5,name:'Deadlocked',creator:'RobTop',points:78,tier:'Main List',victors:['Aven','Marshall','Cylus','Ian'],difficulty:'Demon',song:'Deadlocked',thumb:'deadlocked-thumb.png',completionVideos:[{victor:'Aven',url:'https://www.youtube.com/watch?v=xAMgzi0b-Ic&t=81s'}]},
       {rank:6,name:'Theory of Everything 2',creator:'RobTop',points:72,tier:'Main List',victors:['Cylus'],difficulty:'Demon',song:'Theory of Everything 2',thumb:'toe2-thumb.png'},
       {rank:7,name:'Invisible Clubstep',creator:'Unknown',points:67,tier:'Extended List',victors:['Aven','Cylus'],difficulty:'Easy Demon',song:'Clubstep',thumb:'invisible-clubstep-thumb.png'},
       {rank:8,name:'Clubstep',creator:'RobTop',points:62,tier:'Extended List',victors:['Aven','Cylus'],difficulty:'Demon',song:'Clubstep',thumb:'clubstep-thumb.png'},
@@ -850,7 +850,7 @@
       {name:'Cylus',points:668,records:13},
       {name:'Aven',points:594,records:11},
       {name:'Marshall',points:153,records:4},
-      {name:'Ian',points:93,records:5}
+      {name:'Ian',points:171,records:6}
     ];
 
     const platformerPlayers = [
@@ -1025,7 +1025,7 @@
       document.getElementById('listModeSubtitle').textContent = platformer ? 'Platformer demon rankings and platformer-only points.' : 'Ranked by your group’s own difficulty opinions.';
       document.getElementById('listStatLevels').textContent = platformer ? '1' : '19';
       document.getElementById('listStatPlayers').textContent = platformer ? '1' : '4';
-      document.getElementById('listStatRecords').textContent = platformer ? '1' : '33';
+      document.getElementById('listStatRecords').textContent = platformer ? '1' : '34';
       document.getElementById('listStatHardest').textContent = platformer ? 'Forsaken City' : 'Nine Circles';
       document.querySelector('#listPage .toolbar').classList.remove('hidden');
       document.querySelector('#listPage .content-grid').classList.remove('hidden');
@@ -1059,8 +1059,8 @@
     }));
 
     const tabContentVersions = {
-      list: 2,
-      players: 2,
+      list: 3,
+      players: 3,
       records: 2,
       news: 3,
       submit: 1,
